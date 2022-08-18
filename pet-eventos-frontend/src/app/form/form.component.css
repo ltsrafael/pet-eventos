@@ -1,0 +1,15 @@
+card {
+  width: 100%;
+}
+
+form {
+  text-align: center;
+}
+.input {
+  margin-right: 2%;
+}
+
+.title {
+  margin-left: 5%;
+  margin-right: 2%;
+}

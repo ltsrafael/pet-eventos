@@ -1,0 +1,90 @@
+<p>
+  <mat-toolbar color="primary">
+    <span>PET-EVENTOS</span>
+  </mat-toolbar>
+</p>
+
+<mat-card class="card" *ngIf="login">
+  <mat-progress-bar *ngIf="processing" mode="indeterminate"></mat-progress-bar>
+  <br>
+  <br>
+  <form class="form" [formGroup]="loginForm">
+    <div *ngIf="error">
+      <h3><b>Dados Inválidos</b></h3>
+    </div>
+    <h1><b>Login</b></h1>
+    <mat-form-field class="form">
+      <mat-label>Email</mat-label>
+      <input formControlName="email" matInput type="email" class="form-control" name="email" [(ngModel)]="user.email">
+    </mat-form-field>
+    <br>
+    <mat-form-field class="form">
+      <mat-label>Senha</mat-label>
+      <input formControlName="password" matInput type="password" class="form-control" name="password"
+        [(ngModel)]="user.password">
+    </mat-form-field>
+    <br>
+    <button [disabled]="!loginForm.valid" class="button" color="primary" mat-raised-button
+      (click)="authenticate()">Entrar</button>
+    <!-- <cool-google-button color="light" (click)="loginWithGoogle()" #loginRef>
+      Login with Google
+    </cool-google-button> -->
+    <br>
+    <br>
+    <a class="button" (click)="loginWithGoogle()" #loginRef><img width="15px"
+        style="margin-bottom:3px; margin-right:5px"
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" />
+      Entrar com Google</a>
+    <br>
+    <button mat-button (click)="forgetPassword()">Esqueceu a senha?</button>
+    <br>
+  </form>
+  <br>
+  <div>
+
+  </div>
+
+
+
+  <!-- <button (click)="loginWithGoogle()" #loginRef>submit</button> -->
+
+
+</mat-card>
+
+<mat-card class="card" *ngIf="forgotPassword">
+  <mat-progress-bar *ngIf="processing" mode="indeterminate"></mat-progress-bar>
+  <br>
+  <br>
+  <form class="form" [formGroup]="forgetPasswordForm">
+    <button class="button" mat-button color="primary" (click)="home()" *ngIf="!processing">
+      <mat-icon color="primary">arrow_back_ios</mat-icon>
+    </button>
+    <h1><b>Esqueceu a Senha?</b></h1>
+    <mat-form-field class="form">
+      <mat-label>Email</mat-label>
+      <input formControlName="email" matInput type="email" class="form-control" name="email" [(ngModel)]="user.email">
+    </mat-form-field>
+    <br>
+    <br>
+    <button [disabled]="!forgetPasswordForm.valid || processing" class="button" color="primary" mat-raised-button
+      (click)="resetPassword()">Resetar senha</button>
+    <br>
+    <br>
+  </form>
+</mat-card>
+
+<mat-card class="card" *ngIf="passwordReseted">
+  <br>
+  <br>
+  <form class="form" [formGroup]="forgetPasswordForm">
+    <button class="button" mat-button color="primary" (click)="home()">
+      <mat-icon color="primary">arrow_back_ios</mat-icon>
+    </button>
+    <h1><b>Senha Resetada com sucesso!</b></h1>
+    <h3>Um email com a nova senha foi enviado.</h3>
+    <br>
+    <br>
+    <br>
+    <br>
+  </form>
+</mat-card>

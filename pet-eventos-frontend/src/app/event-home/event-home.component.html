@@ -1,0 +1,404 @@
+<button mat-button color="primary" class="button" (click)="listEvents()"
+  *ngIf="!listingEvents && !processingCertificates">Voltar</button>
+
+<mat-card class="topcard" *ngIf="!eventCreated">
+  <button mat-raised-button color="primary" class="button" (click)="listEvents()" *ngIf="listingEvents">Eventos</button>
+  <button mat-raised-button color="primary" class="button" (click)="newEvent()"
+    *ngIf="listingEvents">NovoEvento</button>
+</mat-card>
+
+<mat-card class="card" *ngIf="viewingEvent">
+  <h4 class="title5"><b>Nome do Evento: {{event.name}}</b></h4>
+  <h4 class="title5">Descrição: {{event.description}}</h4>
+  <h4 class="title5">Local: {{event.place}}</h4>
+  <br>
+  <div class="title5">
+    <mat-expansion-panel [expanded]="step === indexOfelement" (opened)="setStep(indexOfelement)" hideToggle
+      *ngFor="let section of event.sections; index as indexOfelement;">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Seção {{indexOfelement + 1}} {{convertDate(section.start)}}
+        </mat-panel-title>
+        <mat-panel-description>
+          Participantes/Presença
+          <mat-icon>user</mat-icon>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <mat-list *ngIf="event.active">
+        <p class="title5" *ngIf="event.users.length == 0">Não há inscritos no momento.</p>
+        <mat-list-item *ngFor="let user of event.sections[indexOfelement].users">
+          {{user.name}}
+          <mat-checkbox [(ngModel)]="user.isPresent" color="primary">
+          </mat-checkbox>
+        </mat-list-item>
+      </mat-list>
+      <mat-list *ngIf="!event.active">
+        <mat-list-item *ngFor="let user of event.sections[indexOfelement].users">
+          {{user.name}}
+          <mat-checkbox [(ngModel)]="user.isPresent" color="primary" disabled="true" style="margin-left:5%">
+          </mat-checkbox>
+        </mat-list-item>
+      </mat-list>
+    </mat-expansion-panel>
+  </div>
+
+  <br>
+  <button *ngIf="event.active" class="button" style="margin-left: 5%;" mat-button color="primary"
+    (click)="addUser()">Adicionar
+    Participante</button>
+  <div *ngIf="event.active && event.users.length > 0">
+
+    <button class="button" style="margin-left: 5%;" mat-button color="primary" (click)="updateAttendances()">Atualizar
+      Presenças</button>
+    <button class="button" mat-button color="primary" (click)="finishEvent()" *ngIf="presences > 0">Finalizar
+      Evento</button>
+  </div>
+
+  <ng-template #noUsers>
+    Não há inscritos no momento.
+  </ng-template>
+
+</mat-card>
+
+<mat-card class="card" *ngIf="listingEvents">
+  <!-- <button class="button" mat-button color="primary" (click)="postEvent()">Todos Eventos</button>
+  <button class="button" mat-button color="primary" (click)="postEvent()">Eventos Ativos </button>
+  <button class="button" mat-button color="primary" (click)="postEvent()">Eventos Expirados</button> -->
+  <br>
+  <h2 style="margin-left: 5%;"><b>Eventos Cadastrados</b></h2>
+
+  <table mat-table [dataSource]="events" class="table" *ngIf="events.length > 0">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef> Nome do Evento </th>
+      <td mat-cell *matCellDef="let event">{{event.name}}</td>
+    </ng-container>
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef> Status </th>
+      <td mat-cell *matCellDef="let event">{{getEventStatus(event)}}</td>
+    </ng-container>
+    <ng-container matColumnDef="view">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let event">
+        <button class="button" mat-button color="primary" (click)="viewEvent(event)">
+          Detalhes
+        </button>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="inscription">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let event">
+        <button class="button" mat-button color="primary" (click)="openEventInscription(event)" *ngIf="event.active">
+          Inscrição
+        </button>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="edit">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let event">
+        <button class="button" mat-button color="primary" (click)="editEvent(event)" *ngIf="event.active">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button class="button" mat-button color="primary" (click)="editEvent(event)" *ngIf="!event.active"
+          disabled="true">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="delete">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let event">
+        <button class="button" mat-button color="primary" *ngIf="event.active" (click)="cancelEvent(event)">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <button class="button" mat-button color="primary" *ngIf="!event.active" disabled="true">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+  <p class="title" *ngIf="events.length == 0">Nenhum evento cadastrado!</p>
+</mat-card>
+
+<mat-card class="card" *ngIf="addingEvent">
+  <div style="margin-left: 5%;">
+    <h2><b>Adicionando Evento</b></h2>
+    <mat-accordion class="table">
+      <mat-expansion-panel [expanded]="step === 0" (opened)="setStep(0)" hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <b>Evento</b>
+          </mat-panel-title>
+          <mat-panel-description>
+            Informe os dados do Evento
+            <mat-icon>account_circle</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <mat-form-field appearance="fill" class="input">
+          <mat-label>Nome</mat-label>
+          <input matInput [(ngModel)]="event.name" required="true">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="input">
+          <mat-label>Descrição</mat-label>
+          <textarea matInput type="text" class="form-control" name="eventDescription" required="true"
+            [(ngModel)]="event.description">></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="input20">
+          <mat-label>Local</mat-label>
+          <input matInput required="true" [(ngModel)]="event.place">
+        </mat-form-field>
+        <mat-action-row>
+          <button mat-button color="primary" (click)="nextStep()">Próximo</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel [expanded]="step === 1" (opened)="setStep(1)" hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <b>Seções</b>
+          </mat-panel-title>
+          <mat-panel-description>
+            Informe as Seções do Evento
+            <mat-icon>date_range</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div *ngFor="let section of sections; index as indexOfelement;">
+          <p><b>Seção {{indexOfelement+1}}</b></p>
+          <mat-form-field appearance="fill" class="input10">
+            <mat-label>Data</mat-label>
+            <input matInput [matDatepicker]="picker" [min]="minDate" (focus)="picker.open()" readonly
+              [(ngModel)]="section.start" required="true">
+          </mat-form-field>
+          <mat-datepicker #picker></mat-datepicker>
+
+          <mat-form-field appearance="fill" class="input10">
+            <mat-label>Hora Início</mat-label>
+            <input matInput mask="Hh:m0" required="true" [(ngModel)]="section.startTime">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="input10">
+            <mat-label>Hora Término</mat-label>
+            <input matInput mask="Hh:m0" required="true" [(ngModel)]="section.endTime">
+          </mat-form-field>
+          <button mat-button color="primary" (click)="removeSection(indexOfelement)" *ngIf="indexOfelement != 0">
+            <mat-icon>remove_circle</mat-icon>
+          </button>
+        </div>
+        <button class="input" class="button" mat-mini-fab color="primary" (click)="addSection()"
+          *ngIf="sections.length < 5">
+          <mat-icon>add</mat-icon>
+        </button>
+
+        <mat-action-row>
+          <button mat-button color="warn" (click)="prevStep()">Voltar</button>
+          <button mat-button color="primary" (click)="postEvent()">Criar Evento</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+
+    </mat-accordion>
+
+
+  </div>
+
+</mat-card>
+
+<mat-card class="card" *ngIf="editingEvent">
+  <div>
+    <h2><b>Editando Evento</b></h2>
+    <mat-accordion class="table">
+      <mat-expansion-panel [expanded]="step === 0" (opened)="setStep(0)" hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Evento
+          </mat-panel-title>
+          <mat-panel-description>
+            Informe os dados do Evento
+            <mat-icon>account_circle</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <mat-form-field appearance="fill" class="input">
+          <mat-label>Nome</mat-label>
+          <input matInput [(ngModel)]="event.name" required="true">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="input">
+          <mat-label>Descrição</mat-label>
+          <textarea matInput type="text" class="form-control" name="eventDescription" required="true"
+            [(ngModel)]="event.description">></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="input20">
+          <mat-label>Local</mat-label>
+          <input matInput required="true" [(ngModel)]="event.place">
+        </mat-form-field>
+        <mat-action-row>
+          <button mat-button color="primary" (click)="nextStep()">Próximo</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel [expanded]="step === 1" (opened)="setStep(1)" hideToggle>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <div>Seções</div>
+          </mat-panel-title>
+          <mat-panel-description>
+            Informe as Seções do Evento
+            <mat-icon>date_range</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div *ngFor="let section of sections; index as indexOfelement;">
+          <p><b>Seção {{indexOfelement+1}}</b></p>
+          <mat-form-field appearance="fill" class="input10">
+            <mat-label>Data</mat-label>
+            <input matInput [matDatepicker]="picker" [min]="minDate" (focus)="picker.open()" readonly
+              [(ngModel)]="section.start" required="true">
+          </mat-form-field>
+          <mat-datepicker #picker></mat-datepicker>
+
+          <mat-form-field appearance="fill" class="input10">
+            <mat-label>Hora Início</mat-label>
+            <input matInput mask="Hh:m0" required="true" [(ngModel)]="section.startTime">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="input10">
+            <mat-label>Hora Término</mat-label>
+            <input matInput mask="Hh:m0" required="true" [(ngModel)]="section.endTime">
+          </mat-form-field>
+        </div>
+
+        <mat-action-row>
+          <button mat-button color="warn" (click)="prevStep()">Voltar</button>
+          <button mat-button color="primary" (click)="putEvent()">Atualizar Evento</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+
+    </mat-accordion>
+  </div>
+
+</mat-card>
+
+<mat-card class="card" *ngIf="eventCreated">
+  <h2><b>Evento criado com sucesso!</b></h2>
+</mat-card>
+
+<mat-card class="card" *ngIf="eventUpdated">
+  <h2><b>Evento atualizado com sucesso!</b></h2>
+</mat-card>
+
+<mat-card class="card" *ngIf="attendanceUpdated">
+  <h2><b>Presenças alteradas com sucesso!</b></h2>
+</mat-card>
+
+<mat-card class="card" *ngIf="processingCertificates">
+  <h2><b>Processando certificados.</b></h2>
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</mat-card>
+
+<mat-card class="card" *ngIf="certificatesGenerated">
+  <h2><b>Certificados gerados e enviados com sucesso!</b></h2>
+</mat-card>
+
+<mat-card class="card" *ngIf="inscriptionConfirmed">
+  <br>
+  <br>
+  <button class="button" mat-button color="primary" (click)="home()">
+    <mat-icon color="primary">arrow_back_ios</mat-icon>
+  </button>
+  <form class="form">
+    <h1>Inscrição confirmada para o evento {{event.name}}!</h1>
+    <br>
+  </form>
+</mat-card>
+
+<mat-card class="card" *ngIf="filteringUser">
+  <br>
+  <br>
+  <form class="form">
+
+    <h1><b>{{event.name}}</b></h1>
+    <h3>{{event.description}}</h3>
+    <h3>{{event.place}}</h3>
+    <h3>{{convertDate(event.sections[0].start)}}</h3>
+    <mat-form-field class="form" style="width:25% !important">
+      <mat-label>Digite seu Nome Completo ou Matrícula</mat-label>
+      <input matInput type="text" class="form-control" name="name" [(ngModel)]="field">
+    </mat-form-field>
+    <br>
+
+    <br>
+    <button class="button" color="primary" mat-raised-button (click)="find()">Buscar</button>
+    <br>
+    <br>
+  </form>
+</mat-card>
+
+<mat-card class="card" *ngIf="userFound">
+  <button class="button" mat-button color="primary" (click)="home()">
+    <mat-icon color="primary">arrow_back_ios</mat-icon>
+  </button>
+  <br>
+  <br>
+  <form class="form">
+
+    <h1>{{event.name}}</h1>
+
+    <mat-form-field class="title" style="width:25% !important">
+      <mat-label>Nome</mat-label>
+      <input matInput type="text" class="form-control" name="name" disabled [(ngModel)]="user.name">
+    </mat-form-field>
+    <mat-form-field class="input">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" class="form-control" name="email" disabled [(ngModel)]="user.email">
+    </mat-form-field>
+    <mat-form-field class="input">
+      <mat-label>Matrícula</mat-label>
+      <input matInput type="text" class="form-control" name="registration" disabled [(ngModel)]="user.registration">
+    </mat-form-field>
+    <br>
+
+    <br>
+    <button class="button" color="primary" mat-raised-button (click)="confirmInscription()">Confirmar Inscrição</button>
+    <br>
+    <br>
+  </form>
+</mat-card>
+
+<mat-card class="card" *ngIf="userNotFound">
+  <button class="button" mat-button color="primary" (click)="home()">
+    <mat-icon color="primary">arrow_back_ios</mat-icon>
+  </button>
+  <br>
+  <br>
+  <form class="form">
+
+    <h1>{{event.name}}</h1>
+
+    <mat-form-field class="form" class="title">
+      <mat-label>Nome</mat-label>
+      <input matInput type="text" class="form-control" name="name" [(ngModel)]="user.name">
+    </mat-form-field>
+    <mat-form-field class="form" class="input">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" class="form-control" name="email" [(ngModel)]="user.email">
+    </mat-form-field>
+    <mat-form-field class="form" class="input">
+      <mat-label>Matrícula</mat-label>
+      <input matInput type="text" class="form-control" mask="999999999" name="registration"
+        [(ngModel)]="user.registration">
+    </mat-form-field>
+    <br>
+
+    <br>
+    <button class="button" color="primary" mat-raised-button (click)="createUserAndConfirmInscription()">Confirmar
+      Inscrição</button>
+    <br>
+    <br>
+  </form>
+</mat-card>

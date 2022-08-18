@@ -1,0 +1,41 @@
+card {
+  width: 100%;
+}
+button {
+  margin-right: 1%;
+}
+table {
+  margin-left: 5%;
+  width: 90%;
+}
+form {
+  text-align: center;
+}
+.title {
+  margin-left: 7%;
+}
+
+.title5 {
+  margin-left: 5%;
+}
+.input {
+  margin-right: 2%;
+  /* width: 25%;
+  height: 25%; */
+}
+.expansion {
+  margin-right: 5%;
+}
+
+.input10 {
+  margin-right: 2%;
+}
+.input15 {
+  margin-right: 2%;
+}
+
+.input20 {
+  margin-right: 2%;
+  /* width: 20%;
+  height: 25%; */
+}

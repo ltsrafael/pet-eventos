@@ -1,0 +1,235 @@
+<p>
+  <mat-toolbar color="primary">
+    <a (click)="logOut()">
+      <mat-icon>exit_to_app</mat-icon>
+    </a>
+    <span>PET-EVENTOS Admin</span>
+  </mat-toolbar>
+</p>
+<button mat-button color="primary" (click)="getUsers()" *ngIf="!listingUsers && !listingGroups">Voltar</button>
+<button mat-raised-button color="primary" class="button" (click)="getGroups();" *ngIf="listingUsers">Grupos</button>
+<button mat-raised-button color="primary" class="button" (click)="getUsers()" *ngIf="listingGroups">Usuários</button>
+
+<mat-card class="card" *ngIf="addingUser">
+
+
+  <p style="margin-left: 5%;"><b>Adicionando Usuário</b></p>
+  <mat-form-field appearance="fill" class="input10">
+    <mat-label>Nome</mat-label>
+    <input matInput [(ngModel)]="user.name" required="true">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Email</mat-label>
+    <input matInput [(ngModel)]="user.email" required="true">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Matrícula</mat-label>
+    <input matInput [(ngModel)]="user.registration" required="true" type="text">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Tipo de Usuário</mat-label>
+    <mat-select [(ngModel)]="user.userType">
+      <mat-option value="ADMIN">Admin</mat-option>
+      <mat-option value="USER">Usuário</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" *ngIf="user.userType == 'USER'" class="input">
+    <mat-label>Grupo</mat-label>
+    <mat-select [(ngModel)]="user.group.idGroup">
+      <mat-option *ngFor="let group of groups" [value]="group.idGroup">
+        {{group.name}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+
+
+
+  <button class="button" mat-raised-button color="primary" (click)="postUser()">Criar usuário</button>
+
+</mat-card>
+
+<mat-card class="card" *ngIf="listingUsers">
+  <br>
+  <p style="margin-left: 5%;"><b>Usuários</b></p>
+  <table mat-table [dataSource]="users" class="table" *ngIf="users.length > 0">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef> Nome </th>
+      <td mat-cell *matCellDef="let user">{{user.name}}</td>
+    </ng-container>
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef> Email </th>
+      <td mat-cell *matCellDef="let user">{{user.email}}</td>
+    </ng-container>
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef> Tipo </th>
+      <td mat-cell *matCellDef="let user">{{user.userType}}</td>
+    </ng-container>
+    <ng-container matColumnDef="group">
+      <th mat-header-cell *matHeaderCellDef> Grupo </th>
+      <td mat-cell *matCellDef="let user">{{getUserGroup(user)}}</td>
+    </ng-container>
+    <ng-container matColumnDef="edit">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let user">
+        <button class="button" mat-button color="primary" (click)="editUser(user)">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="delete">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let user">
+        <button class="button" mat-button color="primary" (click)="editUser(user)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumnsUser"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumnsUser;"></tr>
+
+  </table>
+  <br>
+  <button style="margin-left:5%;" mat-button color="primary" (click)="addUser()">Adicionar Usuário</button>
+
+  <p *ngIf="users.length == 0">Nenhum usuário cadastrado!</p>
+
+</mat-card>
+
+<mat-card class="card" *ngIf="listingGroups">
+  <br>
+  <p style="margin-left: 5%;"><b>Grupos</b></p>
+  <table mat-table [dataSource]="groups" class="table" *ngIf="groups.length > 0">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef> Nome </th>
+      <td mat-cell *matCellDef="let group">{{group.name}}</td>
+    </ng-container>
+    <ng-container matColumnDef="course">
+      <th mat-header-cell *matHeaderCellDef> Curso </th>
+      <td mat-cell *matCellDef="let group">{{group.course}}</td>
+    </ng-container>
+    <ng-container matColumnDef="edit">
+      <th mat-header-cell *matHeaderCellDef></th>
+      <td mat-cell *matCellDef="let group">
+        <button class="button" mat-button color="primary" (click)="editGroup(group)">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumnsGroup"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumnsGroup;"></tr>
+    <p *ngIf="groups.length == 0">Nenhum Grupocadastrado!</p>
+  </table>
+  <button style="margin-left:5%;" mat-button color="primary" (click)="addGroup()">Adicionar Grupo</button>
+
+</mat-card>
+
+<mat-card class="card" *ngIf="editingUser">
+  <h2 style="margin-left: 5%;">Editando Usuário</h2>
+  <mat-form-field appearance="fill" style="margin-right: 2%;margin-left: 5%;">
+    <mat-label>Nome</mat-label>
+    <input matInput [(ngModel)]="user.name" required="true">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Email</mat-label>
+    <input matInput [(ngModel)]="user.email" required="true">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Matrícula</mat-label>
+    <input matInput [(ngModel)]="user.registration" required="true" type="text">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Tipo de Usuário</mat-label>
+    <mat-select [(ngModel)]="user.userType">
+      <mat-option value="ADMIN">Admin</mat-option>
+      <mat-option value="USER">Usuário</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" *ngIf="user.userType == 'USER'" class="input">
+    <mat-label>Grupo</mat-label>
+    <mat-select [(ngModel)]="user.group.idGroup">
+      <mat-option *ngFor="let group of groups" [value]="group.idGroup">
+        {{group.name}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <button class="button" mat-raised-button color="primary" (click)="putUser()">Atualizar usuário</button>
+
+</mat-card>
+
+
+<mat-card class="card" *ngIf="addingGroup">
+  <h2 style="margin-left:5%;"><b>Adicionando Grupo</b></h2>
+  <mat-form-field appearance="fill" class="input10">
+    <mat-label>Nome</mat-label>
+    <input matInput [(ngModel)]="group.name" required="true">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Descrição</mat-label>
+    <textarea matInput [(ngModel)]="group.description" required="true"></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Centro</mat-label>
+    <input matInput [(ngModel)]="group.center" required="true">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Curso</mat-label>
+    <input matInput [(ngModel)]="group.course" required="true">
+  </mat-form-field>
+
+  <button style="margin-left:5%;" class="button" mat-raised-button color="primary" (click)="postGroup()">Criar
+    grupo</button>
+
+</mat-card>
+
+<mat-card class="card" *ngIf="editingGroup">
+  <h2 style="margin-left:5%;"><b>Editando Grupo</b></h2>
+  <mat-form-field appearance="fill" class="input10">
+    <mat-label>Nome</mat-label>
+    <input matInput [(ngModel)]="group.name" required="true">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Descrição</mat-label>
+    <textarea matInput [(ngModel)]="group.description" required="true"></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Centro</mat-label>
+    <input matInput [(ngModel)]="group.center" required="true">
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="input">
+    <mat-label>Curso</mat-label>
+    <input matInput [(ngModel)]="group.course" required="true">
+  </mat-form-field>
+
+  <button style="margin-left:5%;" class="button" mat-raised-button color="primary" (click)="putGroup()">Atualizar
+    grupo</button>
+
+</mat-card>
+
+
+<mat-card class="card" *ngIf="userAdded">
+  <h4><b>Usuário {{user.name}} criado com sucesso! Um email foi enviado com a senha para acesso.</b></h4>
+</mat-card>
+
+<mat-card class="card" *ngIf="userEdited">
+  <h4><b>Usuário {{user.name}} editado com sucesso!</b></h4>
+</mat-card>
+
+<mat-card class="card" *ngIf="groupAdded">
+  <h4><b>Grupo {{group.name}} criado com sucesso!</b></h4>
+</mat-card>

@@ -1,0 +1,41 @@
+<p>
+  <mat-toolbar color="primary">
+    <span>PET-EVENTOS</span>
+  </mat-toolbar>
+</p>
+<button mat-button color="primary" class="button" (click)="findCertificate()"
+  *ngIf="!searchingCertificate">Voltar</button>
+
+<mat-card class="card" *ngIf="searchingCertificate">
+  <br>
+  <br>
+  <form class="form">
+    <h1>Autenticidade de Certificados</h1>
+    <mat-form-field class="form" style="width:30% !important">
+      <mat-label>Código do Certificado</mat-label>
+      <input matInput type="text" class="form-control" name="name" [(ngModel)]="certificateNumber">
+    </mat-form-field>
+    <br>
+
+    <br>
+    <button class="button" color="primary" mat-raised-button (click)="validate()">Buscar</button>
+    <br>
+    <br>
+  </form>
+</mat-card>
+
+<mat-card class="card" *ngIf="certificateFound">
+  <br>
+  <br>
+  <h3>Certificado {{certificate.number}} emitido em nome de {{certificate.participantName}} para
+    {{certificate.eventName}}
+    totalizando {{certificate.hours}}.</h3>
+  <button mat-mini-fab color="primary" (click)="download()">
+    <mat-icon>download</mat-icon>
+  </button>
+
+
+
+
+  <br>
+</mat-card>

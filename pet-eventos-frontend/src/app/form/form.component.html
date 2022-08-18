@@ -1,0 +1,118 @@
+<p>
+  <mat-toolbar color="primary">
+    <span>PET-EVENTOS</span>
+  </mat-toolbar>
+</p>
+<mat-card class="card" *ngIf="filteringUser">
+  <br>
+  <br>
+  <form class="form">
+
+    <h1><b>{{event.name}}</b></h1>
+    <h3>{{event.description}}</h3>
+    <h3>{{event.place}}</h3>
+    <h3>{{convertDate(event.sections[0].start)}}</h3>
+    <mat-form-field class="form" style="width:25% !important">
+      <mat-label>Digite seu Nome Completo ou Matrícula</mat-label>
+      <input matInput type="text" class="form-control" name="name" [(ngModel)]="field">
+    </mat-form-field>
+    <br>
+
+    <br>
+    <button class="button" color="primary" mat-raised-button (click)="find()">Buscar</button>
+    <br>
+    <br>
+  </form>
+</mat-card>
+
+<mat-card class="card" *ngIf="userFound">
+  <button class="button" mat-button color="primary" (click)="home()">
+    <mat-icon color="primary">arrow_back_ios</mat-icon>
+  </button>
+  <br>
+  <br>
+  <form class="form">
+
+    <h1>{{event.name}}</h1>
+
+    <mat-form-field class="title" style="width:25% !important">
+      <mat-label>Nome</mat-label>
+      <input matInput type="text" class="form-control" name="name" disabled [(ngModel)]="user.name">
+    </mat-form-field>
+    <mat-form-field class="input">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" class="form-control" name="email" disabled [(ngModel)]="user.email">
+    </mat-form-field>
+    <mat-form-field class="input">
+      <mat-label>Matrícula</mat-label>
+      <input matInput type="text" class="form-control" name="registration" disabled [(ngModel)]="user.registration">
+    </mat-form-field>
+    <br>
+
+    <br>
+    <button class="button" color="primary" mat-raised-button (click)="confirmInscription()">Confirmar Inscrição</button>
+    <br>
+    <br>
+  </form>
+</mat-card>
+
+<mat-card class="card" *ngIf="inscriptionConfirmed">
+  <br>
+  <br>
+  <form class="form">
+    <h1>Sua inscrição foi confirmada para o evento {{event.name}}!</h1>
+    <br>
+  </form>
+</mat-card>
+
+<mat-card class="card" *ngIf="inscriptionsClosed">
+  <br>
+  <br>
+  <form class="form">
+
+    <h1>As inscrições para esse evento foram encerradas.</h1>
+    <br>
+  </form>
+</mat-card>
+
+<mat-card class="card" *ngIf="userNotFound">
+  <button class="button" mat-button color="primary" (click)="home()">
+    <mat-icon color="primary">arrow_back_ios</mat-icon>
+  </button>
+  <br>
+  <br>
+  <form class="form">
+
+    <h1>{{event.name}}</h1>
+
+    <mat-form-field class="form" class="title">
+      <mat-label>Nome</mat-label>
+      <input matInput type="text" class="form-control" name="name" [(ngModel)]="user.name">
+    </mat-form-field>
+    <mat-form-field class="form" class="input">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" class="form-control" name="email" [(ngModel)]="user.email">
+    </mat-form-field>
+    <mat-form-field class="form" class="input">
+      <mat-label>Matrícula</mat-label>
+      <input matInput type="text" class="form-control" mask="999999999" name="registration"
+        [(ngModel)]="user.registration">
+    </mat-form-field>
+    <br>
+
+    <br>
+    <button class="button" color="primary" mat-raised-button (click)="createUserAndConfirmInscription()">Confirmar
+      Inscrição</button>
+    <br>
+    <br>
+  </form>
+</mat-card>
+
+<mat-card class="card" *ngIf="error == 'Evento não encontrado'">
+  <br>
+  <br>
+  <form class="form">
+    <h1>{{error}}</h1>
+    <br>
+  </form>
+</mat-card>
